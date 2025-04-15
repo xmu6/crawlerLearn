@@ -1,0 +1,76 @@
+瑞数流程
+1. 瑞数的网站会请求两次page_url(文档请求)，第1次page_url(文档请求)会返回一个cookie1和一个响应体(HTML源码)，请求响应码是202(瑞数3/4代)或者412(瑞数5/6代)
+
+2. 响应体(HTML源码)包括3个部分：
+    - 一个meta标签：其content内容很长且是动态的(每次请求变化)，会在eval执行第二层JS代码时使用到；
+    - 一个ts代码：下面的自执行函数会解密文件内容生成eval执行时需要的JS源码，也就是第二层vm代码；
+    - 一个大自执行函数(每次请求首页都会动态变化)，主要是解密外链JS内容，给window添加一些属性如$_ts,会在vm中使用；
+    这三个要素用于本地生成一个cookie2，用于第2次请求
+
+3. 第2次page_url(文档请求)携带cookie1和cookie2，获取真正的页面内容
+    - 瑞数3/4代有以T和S结尾的两个cookie，其中以S开头的Cookie是第一次的201请求返回的，以T开头的Cookie是由JS生成的，动态变化的，T和S前面一般会跟80或433的数字，Cookie值第一个数字为瑞数的版本
+    - 瑞数5代也有以T和S结尾的两个cookie，但有些特殊的5代也有以O和P结尾的
+
+
+
+破解步骤：
+0. 本地覆盖
+1. 脚本断点，断住`$_ts = window['$_ts']` 和 `if ($_ts.cd){...}`(auto)
+2. 创建文件
+    - env.js
+        content = '...'
+        补环境、代理
+        ......
+        'ts_js';
+        'auto_js';
+    - ts.js
+        拷贝`$_ts = window['$_ts']`（注意一定要恢复源码，瑞数6会检测）
+    - auto.js
+        拷贝`if ($_ts.cd){...}`
+    - main.js:
+        require("./env")
+        require("./ts")
+        require("./auto")
+        function get_cookie(){
+            return document.cookie
+        }
+        console.log(get_cookie())
+    - python  # 处理动态变化
+        session = requests.session()
+        response = session.get(url, headers=headers, verify=False)
+        # 用XPath拼接第二个URL并请求
+        ...
+        auto_js = session.get(auto_url).text
+        with open('env.js', 'r', encoding='utf-8') as js_file:
+            js_code = js_file.read()
+        js_code = js_code.replace(...)  # 替换之前调试时固定的
+        cookie_t = js_compile.call('get_cookie').split(';')[0].split('=')
+        print(cookie_t)
+        session.cookies.update({cookie_t[0]: cookie_t[1]})
+        response = session.get(url, headers=headers, verify=False)
+        print(response)  # <Response [200]>
+3. 补环境
+
+
+
+虚拟环境
+- VM：表示的是virtual machine，这些文件通常表示有浏览器生成和执行的虚拟机脚本环境中的临时脚本。这些脚本并不是项目源代码的一部分，也不是实际存在的物理文件。它们在浏览器的内存中创建并执行。
+- 通过eval函数或者new Function方法，Chrome浏览器会创建一个‘VM’文件来展示临时执行的代码
+
+通过脚本断点断住自执行函数，接下来定位入口：
+# 瑞数5：\S{4}=\S{4}\[\S{4}\[\d{2}\]\]\(\S{4},
+# 瑞数6：搜索 .call
+
+
+
+文件覆盖
+防止动态变化对调试造成干扰
+1. 定位到第一个文档源文件
+2. 工作栏点击替换，生成一个文件夹，允许
+3. 源文件（索引）右键，作为替换内容
+
+
+
+
+
+

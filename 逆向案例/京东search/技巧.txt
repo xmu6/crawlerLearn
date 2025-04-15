@@ -1,0 +1,21 @@
+1. 异步promise/.then()方法
+    - Promise是JavaScript中用于处理异步操作的一种编程模式。.then()方法与许多其他编程语言中的异步处理机制有相似之处，例如Python的 asyncio库或Java的CompletableFuture。
+      但 .then()的特点是它允许以链式方式组织代码，使异步操作更具可读性和可维护性。
+
+    - .then()是Promise对象的一个方法，用于安排在Promise完成（或解析）后要执行的回调函数。它接受一个或两个参数：第一个参数是Promise成功解析时要调用的函数，第二个可选参数是Promise被拒绝时要调用的函数。
+      myPromise.then(successFunction, failureFunction);
+      你可以把它想象成一条传送带上的一个站点：当Promise的结果准备好时，它就会传送到这个站点进行处理。这个站点就是你的 .then()方法
+
+    - 提取异步结果： window.PSign.sign(colorParamSign).then(function(res){console.log(res)})
+
+    - 拿到结果后避免后续环境的影响，用process.exit()强行退出
+
+2. python调用方法
+    - 对控制台内容的传参调用
+        控制台：node xxx.js hihi
+        xxx.js: console.log(process.argv[2])  # hihi，输入的内容以空格为分隔视为数组
+    - python(subprocess)
+        import subprocess
+        subprocess.check_output("mkdir hi; touch aaa.txt", shell=True)  # 所有打印的内容作为返回值
+        # 对于windows，下面的形式才对！！！否则无法对json形式正确传参
+        ret = subprocess,check_output(['node', './jd.js', 'json.dumps(dict)'], shell=False).decode().strip()
