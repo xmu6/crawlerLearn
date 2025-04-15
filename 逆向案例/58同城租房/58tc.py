@@ -52,5 +52,5 @@ params = {
 response = requests.get('https://cd.58.com/chuzu/', params=params, cookies=cookies, headers=headers)
 print(response.text)
 
-html = etree.HTML(response.text)
+
 
