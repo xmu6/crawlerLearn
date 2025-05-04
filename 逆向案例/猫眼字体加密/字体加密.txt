@@ -1,0 +1,8 @@
+字体加密是页面和前端文字文件配合完成的一个反爬策略。通过css对其中一些重要数据进行加密，使我们在代码获取的和在页面上看到的数据是不同的。
+
+前端人员通过font-face来达到这个目的，font-face是css3中的一个模块，主要把自己定义的web字体嵌入到你的网页中。font-face格式为：
+
+@font-face{
+    font-family: <FontName>;  #定义字体的名称。
+    src: <source> [<format>][,[]]*;  # 定义该字体下载的网址，包括ttf, eof, woff格式等
+}
